@@ -1,14 +1,21 @@
 import React, {Component} from 'react';
 import './App.css';
 import Quagga from '@ericblade/quagga2'; // ES6
-
+import Info from './Info';
 
 class App extends Component {
   constructor(props){
     super(props)
     this.state = {
       file: [],
-      gtin: 7891991000826
+      gtin: 7891991000826,
+      data: {
+        image: '',
+        description: '',
+        nutritionalInfo: {
+
+        }
+      }
     }
     const Quagga = require('@ericblade/quagga2').default; 
     this.handleFileChange = this.handleFileChange.bind(this);
@@ -47,7 +54,16 @@ class App extends Component {
   handleClick(){
     fetch(`http://localhost:5000/api/${this.state.gtin}`)
     .then((res) => res.json())
-    .then((data) => console.log('chegou', data))
+    .then((dataResponse) => {
+      this.setState(prevState => {
+        let data = Object.assign({}, prevState.data);  // creating copy of state variable jasper
+        data.image = dataResponse.barcode_image;
+        data.description = dataResponse.description;
+        return {data}
+      }, () => {
+        fetch(`http://localhost:5000/api/info/${this.state.data.description}`)
+      })
+    })
     .catch(err => console.log("Errro", err))
   }
 
@@ -86,6 +102,9 @@ class App extends Component {
         <br />
         <input type="number" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
         <button onClick={this.handleClick}>Submit</button>
+        {
+          this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
+        }
       </div>
     );
   }
