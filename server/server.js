@@ -24,11 +24,10 @@ app.get('/api/:gtin', async (req, res) => {
 app.get('/api/info/:desc',  async (req, res) => {
     let foodListDescArray = foodList.map(it => it.description.toUpperCase());
     // let foodListDescArray = ["Refrigerante, tipo água tônica", "Refrigerante, tipo cola", "Refrigerante, tipo guaraná"]
-    console.log(req.params.desc)
+    // console.log(req.params.desc)
     var stringMatch = stringSimilarity.findBestMatch(req.params.desc.toUpperCase(), foodListDescArray);
     let info = foodList.filter(item => item.description.toUpperCase() === stringMatch.bestMatch.target)
-
-    res.send(info);
+    res.send(info[0]);
 })
 
 app.listen(5000, () => {

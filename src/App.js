@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import Quagga from '@ericblade/quagga2'; // ES6
 import Info from './Info';
+import NutritionalInfo from './NutritionalInfo';
 
 class App extends Component {
   constructor(props){
@@ -12,9 +13,6 @@ class App extends Component {
       data: {
         image: '',
         description: '',
-        nutritionalInfo: {
-
-        }
       }
     }
     const Quagga = require('@ericblade/quagga2').default; 
@@ -62,6 +60,14 @@ class App extends Component {
         return {data}
       }, () => {
         fetch(`http://localhost:5000/api/info/${this.state.data.description}`)
+        .then(result => result.json())
+        .then(res => {
+          this.setState(prevState => {
+            let data =  Object.assign({}, prevState.data)
+            data.nutritionalInfo = res
+            return {data}
+          })
+        })
       })
     })
     .catch(err => console.log("Errro", err))
@@ -104,6 +110,9 @@ class App extends Component {
         <button onClick={this.handleClick}>Submit</button>
         {
           this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
+        }
+        {
+          this.state.data.nutritionalInfo ? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p></p>
         }
       </div>
     );
