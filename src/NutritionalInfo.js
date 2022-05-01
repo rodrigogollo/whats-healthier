@@ -1,7 +1,7 @@
 const NutritionalInfo = ({nutritionalInfo}) => {
     return (
     <div className='Informações Nutricionais'>
-        <h1>Informações Nutricionais</h1>
+        <h1>Informações Nutricionais - {nutritionalInfo.description}</h1>
         
          <ul key={nutritionalInfo.id} id={nutritionalInfo.id}>
              {console.log('n', nutritionalInfo)}

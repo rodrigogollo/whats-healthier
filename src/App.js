@@ -9,7 +9,7 @@ class App extends Component {
     super(props)
     this.state = {
       file: [],
-      gtin: 7891991000826,
+      gtin: 7896004006482,
       data: {
         image: '',
         description: '',
@@ -25,6 +25,14 @@ class App extends Component {
   //  .then((res) => res.json())
   //  .then((data) => console.log(data.message));
   // }, []);
+
+
+  //REFRIGERANTE GUARANÁ = 7891991000826
+  //PAÇOCA - 7896181711971 - deu ruim
+  //PRINGLES - 7896004006482 - deu ruim
+  //REPOLHO - 7898108111369
+  //MELADO - 7898916045016
+  //LEITE CONDENSADO - 7896590817035
 
   handleFileChange(e){
     this.setState({file: e.target.files[0]})
@@ -53,6 +61,7 @@ class App extends Component {
     fetch(`http://localhost:5000/api/${this.state.gtin}`)
     .then((res) => res.json())
     .then((dataResponse) => {
+      console.log(dataResponse)
       this.setState(prevState => {
         let data = Object.assign({}, prevState.data);  // creating copy of state variable jasper
         data.image = dataResponse.barcode_image;
@@ -68,6 +77,7 @@ class App extends Component {
             return {data}
           })
         })
+        .catch(err => console.log("Produto não encontrado na tabela TACO"))
       })
     })
     .catch(err => console.log("Errro", err))
@@ -106,13 +116,13 @@ class App extends Component {
         <br />
         <label htmlFor="gtin">Digite o Número do Código de Barras:</label>
         <br />
-        <input type="number" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
+        <input type="text" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
         <button onClick={this.handleClick}>Submit</button>
         {
           this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
         }
         {
-          this.state.data.nutritionalInfo ? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p></p>
+          this.state.data.nutritionalInfo ? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p>Informações não encontradas</p>
         }
       </div>
     );
