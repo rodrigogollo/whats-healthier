@@ -21,19 +21,58 @@ app.get('/api/:gtin', async (req, res) => {
     res.send(data);
 });
 
-app.get('/api/info/:desc',  async (req, res) => {
+app.get('/api/info/:desc', async (req, res) => {
     
     let produto = format(req.params.desc)
     let foodListDescArray = foodList.map(it => format(it.description));
     console.log(req.params.desc)
-    var stringMatch = stringSimilarity.findBestMatch(produto, foodListDescArray);
-    let info = []
-    console.log(stringMatch)
-    if(stringMatch.bestMatch.rating >= 0.51) {
-        info = foodListDescArray.filter(item => item.description === stringMatch.bestMatch.target)
-    } 
+
+    let arrayPalavras = produto.split(" ");
+    let resultados = [];
+    for(const palavra of arrayPalavras){
+        //console.log('palavra', palavra)
+        let retorno = foodListDescArray.filter(item => {
+            if(item.indexOf(palavra) !== -1) return true
+        })
+        //console.log('retorno', retorno)
+        resultados.push(retorno);
+    }
+
+    let resultadosUnicos = [...new Set(resultados.flat(1))]
+    //console.log('res', resultadosUnicos);
+
+    var stringMatch = await stringSimilarity.findBestMatch(produto, resultadosUnicos);
+    let info = [];
+    console.log(stringMatch.bestMatch)
+    if(stringMatch.bestMatch.rating >= 0.41) {
+        info = foodList.filter(item => format(item.description) == format(stringMatch.bestMatch.target))
+    }
     res.send(info[0]);
 })
+
+app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
+    let produtoTACO = foodList.find(item => item.description == req.params.desc);
+    let categoriaTACO = categoryList.find(categoria => categoria.id == produtoTACO.category_id);
+    let comorbidade = req.params.comorbidade;
+    const atributo = comorbidade == 'hipertensao' ? 'sodium' : 'carbohydrate';
+
+    console.log(comorbidade, ' - ', atributo)
+
+    let foodListHasProperty = foodList.filter(item => item.attributes.hasOwnProperty(atributo))
+
+    let produtosTACOCategoria = foodListHasProperty.filter(item => item.category_id == categoriaTACO.id && 
+        item.description != req.params.desc && 
+        item.attributes[atributo].qty < produtoTACO.attributes[atributo].qty
+    );
+
+    let result = produtosTACOCategoria.sort((a, b) => a.attributes[atributo].qty - b.attributes[atributo].qty);
+
+    let recomendadosSemTR = result.filter(item => item.attributes[atributo].qty !== "Tr")
+
+    const TOP3Recomendados = recomendadosSemTR.slice(0, 3)
+
+    res.send(TOP3Recomendados)
+});
 
 app.listen(5000, () => {
     console.log('server running in port ', 5000);

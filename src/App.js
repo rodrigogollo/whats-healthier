@@ -9,7 +9,8 @@ class App extends Component {
     super(props)
     this.state = {
       file: [],
-      gtin: 7896004006482,
+      gtin: 7891991000826,
+      comorbidade: 'diabetes',
       data: {
         image: '',
         description: '',
@@ -33,6 +34,7 @@ class App extends Component {
   //REPOLHO - 7898108111369
   //MELADO - 7898916045016
   //LEITE CONDENSADO - 7896590817035
+  //BISCOITO TRAQUINAS - 7622210592750
 
   handleFileChange(e){
     this.setState({file: e.target.files[0]})
@@ -57,30 +59,43 @@ class App extends Component {
     this.setState({gtin:e.target.value})
   }
 
-  handleClick(){
-    fetch(`http://localhost:5000/api/${this.state.gtin}`)
-    .then((res) => res.json())
-    .then((dataResponse) => {
-      console.log(dataResponse)
-      this.setState(prevState => {
-        let data = Object.assign({}, prevState.data);  // creating copy of state variable jasper
-        data.image = dataResponse.barcode_image;
-        data.description = dataResponse.description;
-        return {data}
-      }, () => {
-        fetch(`http://localhost:5000/api/info/${this.state.data.description}`)
-        .then(result => result.json())
-        .then(res => {
+  handleClick() {
+    try {
+      fetch(`http://localhost:5000/api/${this.state.gtin}`)
+      .then(res => res.json())
+      .then(dataResponse => {
+        this.setState(prevState => {
+          let data = Object.assign({}, prevState.data);  // creating copy of state variable jasper
+          data.image = dataResponse.barcode_image;
+          data.description = dataResponse.description;
+          return {data}
+        })
+        return dataResponse
+      })
+      .then(response => {
+        console.log('respo', response)
+        fetch(`http://localhost:5000/api/info/${response.description}`)
+        .then(data => data.json())
+        .then(resTACO => {
+          console.log('resTACO', resTACO)
           this.setState(prevState => {
-            let data =  Object.assign({}, prevState.data)
-            data.nutritionalInfo = res
+            let data = Object.assign({}, prevState.data)
+            data.nutritionalInfo = resTACO
             return {data}
           })
+          return resTACO
         })
-        .catch(err => console.log("Produto não encontrado na tabela TACO"))
+        .then(responseTACO => {
+          fetch(`http://localhost:5000/api/recomendar/${responseTACO.description}/${this.state.comorbidade}`)
+          .then(response => response.json())
+          .then(data => this.setState({recomendados: data}))
+          .catch(err => console.log(err))
+        })
+        .catch(err => console.log('Erro fetch TACO - PRODUTO NÃO ENCONTRADO', err))
       })
-    })
-    .catch(err => console.log("Errro", err))
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   componentDidMount(){
@@ -122,7 +137,7 @@ class App extends Component {
           this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
         }
         {
-          this.state.data.nutritionalInfo ? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p>Informações não encontradas</p>
+          this.state.data.nutritionalInfo? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p>Informações não encontradas</p>
         }
       </div>
     );
