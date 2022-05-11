@@ -1,0 +1,24 @@
+.NutritionalInfo {
+    display: flex;
+    flex-direction: row;
+    justify-self: center;
+    align-items: center;
+    /* width: 50%; */
+    margin: 20px auto;
+}
+
+table, th, td {
+    border: 1px solid;
+}
+
+tbody > tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+tr:nth-child(3) > th {
+    background-color: #04AA6D;
+}

@@ -3,6 +3,9 @@ import './App.css';
 import Quagga from '@ericblade/quagga2'; // ES6
 import Info from './Info';
 import NutritionalInfo from './NutritionalInfo';
+import Recomendados from './Recomendados';
+import {traduzir} from '../Utils/traduzir';
+
 
 class App extends Component {
   constructor(props){
@@ -73,22 +76,28 @@ class App extends Component {
         return dataResponse
       })
       .then(response => {
-        console.log('respo', response)
         fetch(`http://localhost:5000/api/info/${response.description}`)
         .then(data => data.json())
         .then(resTACO => {
-          console.log('resTACO', resTACO)
+          let atributosTraduzidos = traduzir(resTACO.attributes);
+          resTACO.attributes = atributosTraduzidos;
+          return resTACO
+        }).then(dataTraduzida => {
           this.setState(prevState => {
             let data = Object.assign({}, prevState.data)
-            data.nutritionalInfo = resTACO
+            data.nutritionalInfo = dataTraduzida
             return {data}
           })
-          return resTACO
+          return dataTraduzida
         })
         .then(responseTACO => {
           fetch(`http://localhost:5000/api/recomendar/${responseTACO.description}/${this.state.comorbidade}`)
           .then(response => response.json())
-          .then(data => this.setState({recomendados: data}))
+          .then(resTACO => {
+            let atributosTraduzidos = traduzir(resTACO.attributes);
+            resTACO.attributes = atributosTraduzidos;
+            return resTACO
+          }).then(data => this.setState({recomendados: data}))
           .catch(err => console.log(err))
         })
         .catch(err => console.log('Erro fetch TACO - PRODUTO NÃO ENCONTRADO', err))
@@ -137,7 +146,10 @@ class App extends Component {
           this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
         }
         {
-          this.state.data.nutritionalInfo? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p>Informações não encontradas</p>
+          this.state.data.nutritionalInfo? <NutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} /> : <p></p>
+        }
+        { 
+          this.state.recomendados? <Recomendados recomendados={this.state.recomendados}/> : <p></p>
         }
       </div>
     );
