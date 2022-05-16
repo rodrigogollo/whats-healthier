@@ -44,34 +44,77 @@ app.get('/api/info/:desc', async (req, res) => {
     var stringMatch = await stringSimilarity.findBestMatch(produto, resultadosUnicos);
     let info = [];
     console.log(stringMatch.bestMatch)
-    if(stringMatch.bestMatch.rating >= 0.41) {
+    if(stringMatch.bestMatch.rating >= 0.51) {
         info = foodList.filter(item => format(item.description) == format(stringMatch.bestMatch.target))
     }
     res.send(info[0]);
 })
 
 app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
-    let produtoTACO = foodList.find(item => item.description == req.params.desc);
-    let categoriaTACO = categoryList.find(categoria => categoria.id == produtoTACO.category_id);
-    let comorbidade = req.params.comorbidade;
-    const atributo = comorbidade == 'hipertensao' ? 'sodium' : 'carbohydrate';
+    try {
 
-    console.log(comorbidade, ' - ', atributo)
+        let produtoTACO = foodList.find(item => item.description == req.params.desc);
+        let categoriaTACO = categoryList.find(categoria => categoria.id == produtoTACO.category_id);
+        let comorbidade = req.params.comorbidade;
+        let atributo;
+        switch(comorbidade){
+            case 'hipertensao': 
+                atributo = 'sodium';
+                break;
+            case 'diabetes': 
+                atributo = 'carbohydrate';
+                break;
+            case 'ambos': 
+                atributo = 'ambos';
+                break;
+            default:   
+                atributo = 'ambos';
+                break;
+        }
+    
+        console.log(comorbidade, ' - ', atributo)
+        let foodListHasProperty;
+        let produtosTACOCategoria;
+        let recomendadosSemTR;
 
-    let foodListHasProperty = foodList.filter(item => item.attributes.hasOwnProperty(atributo))
+        if(atributo == 'ambos'){
+            foodListHasProperty = foodList.filter(item => (
+                item.attributes.hasOwnProperty('sodium') && 
+                item.attributes.hasOwnProperty('carbohydrate')));
+            if(foodListHasProperty.length > 0) {
+                produtosTACOCategoria = foodListHasProperty.filter(item => 
+                    item.category_id == categoriaTACO.id && 
+                    item.description != req.params.desc && 
+                    item.attributes['sodium'].qty < produtoTACO.attributes['sodium'].qty && 
+                    item.attributes['carbohydrate'].qty < produtoTACO.attributes['carbohydrate'].qty 
+                );
+                let result = produtosTACOCategoria.sort((a, b) => 
+                    (a.attributes['sodium'].qty - b.attributes['sodium'].qty) && 
+                    (a.attributes['carbohydrate'].qty - b.attributes['carbohydrate'].qty) 
+                );
+    
+                recomendadosSemTR = result.filter(item => item.attributes['sodium'].qty !== "Tr" && item.attributes['carbohydrate'].qty !== "Tr")
+            } else {
+                res.send('PRODUTO NÃO ENCONTRADO')
+            }
+        } else {
+            console.log('entrou else')
+            foodListHasProperty = foodList.filter(item => item.attributes.hasOwnProperty(atributo))
+        
+            produtosTACOCategoria = foodListHasProperty.filter(item => item.category_id == categoriaTACO.id && 
+                item.description != req.params.desc && 
+                item.attributes[atributo].qty < produtoTACO.attributes[atributo].qty
+            );
+            let result = produtosTACOCategoria.sort((a, b) => a.attributes[atributo].qty - b.attributes[atributo].qty);
+            recomendadosSemTR = result.filter(item => item.attributes[atributo].qty !== "Tr")
+        }
 
-    let produtosTACOCategoria = foodListHasProperty.filter(item => item.category_id == categoriaTACO.id && 
-        item.description != req.params.desc && 
-        item.attributes[atributo].qty < produtoTACO.attributes[atributo].qty
-    );
-
-    let result = produtosTACOCategoria.sort((a, b) => a.attributes[atributo].qty - b.attributes[atributo].qty);
-
-    let recomendadosSemTR = result.filter(item => item.attributes[atributo].qty !== "Tr")
-
-    const TOP3Recomendados = recomendadosSemTR.slice(0, 3)
-
-    res.send(TOP3Recomendados)
+        const TOP3Recomendados = recomendadosSemTR.slice(0, 3)
+    
+        res.send(TOP3Recomendados)
+    } catch (e) {
+        throw new Error(e)
+    }
 });
 
 app.listen(5000, () => {

@@ -11,6 +11,8 @@ class App extends Component {
   constructor(props){
     super(props)
     this.state = {
+      checkedOne: true,
+      checkedTwo: false,
       file: [],
       gtin: 7891991000826,
       comorbidade: 'diabetes',
@@ -19,17 +21,12 @@ class App extends Component {
         description: '',
       }
     }
-    const Quagga = require('@ericblade/quagga2').default; 
     this.handleFileChange = this.handleFileChange.bind(this);
     this.handleNumberChange = this.handleNumberChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleChangeOne = this.handleChangeOne.bind(this);
+    this.handleChangeTwo = this.handleChangeTwo.bind(this);
   }
-  // React.useEffect(() => {
-  //  fetch("https://api.cosmos.bluesoft.com.br/gtins/7891991000826")
-  //  .then((res) => res.json())
-  //  .then((data) => console.log(data.message));
-  // }, []);
-
 
   //REFRIGERANTE GUARANÁ = 7891991000826
   //PAÇOCA - 7896181711971 - deu ruim
@@ -38,6 +35,7 @@ class App extends Component {
   //MELADO - 7898916045016
   //LEITE CONDENSADO - 7896590817035
   //BISCOITO TRAQUINAS - 7622210592750
+  //MANGA ESPADA - 7898205079357
 
   handleFileChange(e){
     this.setState({file: e.target.files[0]})
@@ -60,6 +58,35 @@ class App extends Component {
 
   handleNumberChange(e){
     this.setState({gtin:e.target.value})
+  }
+
+  handleChangeOne(){
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        checkedOne: !prevState.checkedOne
+      }
+    }, () => {
+      if(this.state.checkedOne && this.state.checkedTwo) {
+        this.setState({comorbidade: 'ambos'})
+      } 
+      else if(this.state.checkedOne) this.setState({comorbidade: 'diabetes'})
+      else if(this.state.checkedTwo) this.setState({comorbidade: 'hipertensao'})
+    })
+  }
+  handleChangeTwo(){
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        checkedTwo: !prevState.checkedTwo
+      }
+    }, () => {
+      if(this.state.checkedOne && this.state.checkedTwo) {
+        this.setState({comorbidade: 'ambos'})
+      } 
+      else if(this.state.checkedOne) this.setState({comorbidade: 'diabetes'})
+      else if(this.state.checkedTwo) this.setState({comorbidade: 'hipertensao'})
+    })
   }
 
   handleClick() {
@@ -94,10 +121,12 @@ class App extends Component {
           fetch(`http://localhost:5000/api/recomendar/${responseTACO.description}/${this.state.comorbidade}`)
           .then(response => response.json())
           .then(resTACO => {
-            let atributosTraduzidos = traduzir(resTACO.attributes);
-            resTACO.attributes = atributosTraduzidos;
-            return resTACO
-          }).then(data => this.setState({recomendados: data}))
+            resTACO.map((item, i) => {
+              return resTACO[i].attributes = traduzir(item.attributes);
+            }) 
+            return resTACO;
+          })
+          .then(data => this.setState({recomendados: data}))
           .catch(err => console.log(err))
         })
         .catch(err => console.log('Erro fetch TACO - PRODUTO NÃO ENCONTRADO', err))
@@ -109,39 +138,58 @@ class App extends Component {
 
   componentDidMount(){
     Quagga.init({
-      inputStream : {
-        name : "Live",
-        type : "LiveStream",
-        target: this.state.file   // Or '#yourElement' (optional)
-      },
-      decoder : {
-        readers : ["code_128_reader"]
-      }
-    }, function(err) {
-        if (err) {
-            console.log(err);
-            return
+        inputStream : {
+          name : "Live",
+          type : "LiveStream",
+          target: this.state.file   // Or '#yourElement' (optional)
+        },
+        decoder : {
+          readers : ["code_128_reader"]
         }
-        console.log("Initialization finished. Ready to start");
-        Quagga.start();
-    });
-    Quagga.onDetected((data)=> {
-      console.log("detectado")
-      console.log(data);
-    })
+      }, function(err) {
+          if (err) {
+              console.log(err);
+              return
+          }
+          console.log("Initialization finished. Ready to start");
+          Quagga.start();
+      });
+      Quagga.onDetected((data)=> {
+        console.log("detectado")
+        console.log(data);
+      })
   }
 
   render(){
     return (
       <div className="App">
-        <label htmlFor='imageFile'>Selecione um código de barras</label>
-        <br />
-        <input type="file" id="imageFile" capture="user" accept="image/*" onChange={this.handleFileChange} />
-        <br />
-        <label htmlFor="gtin">Digite o Número do Código de Barras:</label>
-        <br />
-        <input type="text" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
-        <button onClick={this.handleClick}>Submit</button>
+        <div className="comorbidades">
+          <h2>Comorbidades</h2>
+          <h3>Selecione sua Comorbidade:</h3>
+          <Checkbox
+            label="Diabetes"
+            value={this.state.checkedOne}
+            onChange={this.handleChangeOne}
+          />
+          <Checkbox
+            label="Hipertensão"
+            value={this.state.checkedTwo}
+            onChange={this.handleChangeTwo}
+          />
+        </div>
+        <div className="codigoBarras">
+          <div className="Camera">
+            <label htmlFor='imageFile'>Selecione um código de barras:
+              <input type="file" id="imageFile" capture="user" accept="image/*" onChange={this.handleFileChange} />
+            </label>
+          </div>
+          <div className="Digitar">
+            <label htmlFor="gtin">Digite o Número do Código de Barras: 
+              <input type="text" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
+            </label>
+          </div>
+        </div>
+        <button onClick={this.handleClick}>Buscar</button>
         {
           this.state.data ? <Info description={this.state.data.description} image={this.state.data.image} /> : <p></p>
         }
@@ -157,3 +205,12 @@ class App extends Component {
 }
 
 export default App;
+
+const Checkbox = ({ label, value, onChange }) => {
+  return (
+    <label>
+      <input type="checkbox" checked={value} onChange={onChange} />
+      {label}
+    </label>
+  );
+};
