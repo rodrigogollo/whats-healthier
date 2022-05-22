@@ -1,7 +1,7 @@
 export function traduzir(obj) {
     let att = obj.attributes;
     let newObj = {};   
-    newObj['vitamina C'] = obj?.vitaminC;
+    if( obj.vitaminC) newObj['vitamina C'] = obj.vitaminC;
     for(const key in att) {
         switch(key) {
             case 'humidity': {

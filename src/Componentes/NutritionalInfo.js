@@ -6,7 +6,7 @@ const NutritionalInfo = ({nutritionalInfo}) => {
         <table key={nutritionalInfo.id} id={nutritionalInfo.id}>
             <thead>
                 <tr>
-                    <th colSpan="3">Informações Nutricionais - {nutritionalInfo.description}</th>
+                    <th colSpan="3">{nutritionalInfo.description}</th>
                 </tr>
                 <tr>
                     <th colSpan="3">Composição de alimentos por 100 gramas de parte comestível</th>
@@ -18,7 +18,8 @@ const NutritionalInfo = ({nutritionalInfo}) => {
             </thead>
             <tbody>
                 {
-                    Object.entries(nutritionalInfo.attributes).map((key, value) => {
+                    Object.entries(nutritionalInfo?.attributes)
+                    .map((key, value) => {
                         return <tr key={key[0]}>
                             <td key={key[0]} id={key[0]}>{key[0].charAt(0).toUpperCase() + key[0].slice(1)}</td>
                             <td>

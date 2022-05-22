@@ -1,3 +1,13 @@
+.Info {
+    display: inline-block;
+}
+
+.Info h2 {
+    font-size: 20px;
+    display: inline-block;
+    width: 200px;
+}
+
 .Info img {
     width: 150px;
 }

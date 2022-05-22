@@ -80,6 +80,19 @@ class App extends Component {
   }
 
   handleClick() {
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        camera: false,
+        data: {
+          image: '',
+          description: '',
+        },
+      recomendados: [],
+      buscouGTIN: false,
+      buscouRecomendados: false,
+      }
+    })
     try {
       fetch(`http://localhost:5000/api/${this.state.gtin}`)
       .then(res => res.json())
@@ -157,17 +170,9 @@ class App extends Component {
   render(){
     return (
       <div className="App">
-         <div className="Scanner">
-          <button onClick={this.handleEscanearClick}>
-            {this.state.camera ? "Parar" : "Escanear"}
-          </button>
-          <div className="container">
-            {this.state.camera && <Scanner onDetected={this.onDetected} />}
-          </div>
-        </div>
+        <h1>What's Healthier?</h1>
 
         <div className="comorbidades">
-          <h2>Comorbidades</h2>
           <h3>Selecione sua Comorbidade:</h3>
           <Checkbox
             label="Diabetes"
@@ -181,17 +186,28 @@ class App extends Component {
           />
         </div>
 
+       
+
+
         <div className="codigoBarras">
           <div className="Digitar">
             <label htmlFor="gtin">Digite o Número do Código de Barras: 
               <input type="text" value={this.state.gtin} id="gtin" onChange={this.handleNumberChange} />
             </label>
           </div>
+          <button onClick={this.handleClick} disabled={!(this.state.checkedOne || this.state.checkedTwo)}>Buscar</button>
+          <div className="Scanner">
+            <button onClick={this.handleEscanearClick} disabled={!(this.state.checkedOne || this.state.checkedTwo)}>
+              {this.state.camera ? "Parar" : "Escanear"}
+            </button>
+            <div className="container" style={{display: this.state.camera ? 'block' : 'none' }}>
+              {this.state.camera && <Scanner onDetected={this.onDetected} />}
+            </div>
+          </div>
         </div>
 
-        <button onClick={this.handleClick}>Buscar</button>
         {this.state.buscouGTIN && 
-          <div>
+          <div className='Produto'>
             <ShowInfo description={this.state.data.description} image={this.state.data.image} />
             <ShowNutritionalInfo nutritionalInfo={this.state.data.nutritionalInfo} />
           </div>
@@ -219,7 +235,7 @@ const ShowInfo = ({description, image}) => {
   if(description){
     return <Info description={description} image={image} />
   } else {
-    return <p>Produto não encontrado na tabela TACO.</p>
+    return <p className='erro'>Produto não encontrado na tabela TACO.</p>
   }
 }
 
@@ -227,13 +243,13 @@ const ShowNutritionalInfo = ({nutritionalInfo}) => {
   if(nutritionalInfo){
     return <NutritionalInfo nutritionalInfo={nutritionalInfo} />
   } else {
-    return <p>Produto não encontrado na tabela TACO.</p>
+    return <p className='erro'>Produto não encontrado na tabela TACO.</p>
   }
 }
 const ShowRecomendados = ({recomendados}) => {
   if(recomendados?.length>0){
     return <Recomendados recomendados={recomendados}/>
   } else {
-    return <p>Nenhum produto encontrado para recomendação.</p>
+    return <p className='erro'>Nenhum produto encontrado para recomendação.</p>
   }
 }

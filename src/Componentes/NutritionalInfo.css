@@ -9,6 +9,11 @@
 
 table, th, td {
     border: 1px solid;
+    padding-left: 10px;
+}
+
+td >p {
+    margin: 0;
 }
 
 tbody > tr:nth-child(even){
