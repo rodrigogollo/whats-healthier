@@ -1,89 +1,113 @@
 export function traduzir(obj) {
-    let newObj = {};
-    for(const key in obj) {
+    let att = obj.attributes;
+    let newObj = {};   
+    newObj['vitamina C'] = obj?.vitaminC;
+    for(const key in att) {
         switch(key) {
             case 'humidity': {
-                newObj['umidade'] = obj[key];
+                newObj['umidade'] = att[key];
                 break;
             }
             case 'protein': {
-                newObj['proteina'] = obj[key];
+                newObj['proteina'] = att[key];
                 break;
             }
             case 'lipid': {
-                newObj['lipideos'] = obj[key];
+                newObj['lipideos'] = att[key];
                 break;
             }
             case 'cholesterol': {
-                newObj['colesterol'] = obj[key];
+                newObj['colesterol'] = att[key];
                 break;
             }
             case 'carbohydrate': {
-                newObj['carboidrato'] = obj[key];
+                newObj['carboidrato'] = att[key];
                 break;
             }
             case 'fiber': {
-                newObj['fibra'] = obj[key];
+                newObj['fibra'] = att[key];
                 break;
             }
             case 'ashes': {
-                newObj['cinzas'] = obj[key];
+                newObj['cinzas'] = att[key];
                 break;
             }
             case 'calcium': {
-                newObj['calcio'] = obj[key];
+                newObj['calcio'] = att[key];
                 break;
             }
             case 'magnesium': {
-                newObj['magnesio'] = obj[key];
+                newObj['magnesio'] = att[key];
                 break;
             }
             case 'phosphorus': {
-                newObj['fosforo'] = obj[key];
+                newObj['fosforo'] = att[key];
                 break;
             }
             case 'iron': {
-                newObj['ferro'] = obj[key];
+                newObj['ferro'] = att[key];
                 break;
             }
             case 'sodium': {
-                newObj['sodio'] = obj[key];
+                newObj['sodio'] = att[key];
                 break;
             }
             case 'potassium': {
-                newObj['potassio'] = obj[key];
+                newObj['potassio'] = att[key];
                 break;
             }
             case 'copper': {
-                newObj['cobre'] = obj[key];
+                newObj['cobre'] = att[key];
                 break;
             }
             case 'zinc': {
-                newObj['zinco'] = obj[key];
+                newObj['zinco'] = att[key];
                 break;
             }
             case 'thiamine': {
-                newObj['tiamina'] = obj[key];
+                newObj['tiamina'] = att[key];
                 break;
             }
             case 'riboflavin': {
-                newObj['riboflavina'] = obj[key];
+                newObj['riboflavina'] = att[key];
                 break;
             }
             case 'pyridoxine': {
-                newObj['piridoxina'] = obj[key];
+                newObj['piridoxina'] = att[key];
                 break;
             }
             case 'niacin': {
-                newObj['niacina'] = obj[key];
+                newObj['niacina'] = att[key];
                 break;
             }
             case 'energy': {
-                newObj['energia'] = obj[key];
+                newObj['energia'] = att[key];
                 break;
             }
             case 'fatty_acids': {
-                newObj['acidos_graxos'] = obj[key];
+                newObj['acidos graxos'] = att[key];
+                break;
+            }
+            case 'manganese': {
+                newObj['magnesio'] = att[key];
+                break;
+            }
+            default: {
+                newObj[key] = att[key]
+                break;
+            }
+        }
+    }
+    newObj['acidos graxos'] = traduzirFattyAcids(newObj['acidos graxos']);
+    return newObj;
+}
+
+function traduzirFattyAcids(obj){
+    let newObj = {};
+    for(const key in obj) {
+        switch(key) {
+            case 'saturated': {
+                newObj['saturado'] = obj[key];
                 break;
             }
             case 'monounsaturated': {
@@ -94,17 +118,11 @@ export function traduzir(obj) {
                 newObj['poliinsaturado'] = obj[key];
                 break;
             }
-            case 'manganese': {
-                newObj['magnesio'] = obj[key];
+            default: {
+                newObj[key] = obj[key]
                 break;
-            }    
+            }
         }
-
-        // switch(obj[key]) {
-        //     case 'percents': {
-        //         newObj[key] = '%'
-        //     }
-        // }
     }
     return newObj;
 }

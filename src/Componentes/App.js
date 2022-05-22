@@ -98,7 +98,7 @@ class App extends Component {
         fetch(`http://localhost:5000/api/info/${response.description}`)
         .then(data => data.json())
         .then(resTACO => {
-          let atributosTraduzidos = traduzir(resTACO.attributes);
+          let atributosTraduzidos = traduzir(resTACO);
           resTACO.attributes = atributosTraduzidos;
           return resTACO
         }).then(dataTraduzida => {
@@ -114,7 +114,7 @@ class App extends Component {
           .then(response => response.json())
           .then(resTACO => {
             resTACO.map((item, i) => {
-              return resTACO[i].attributes = traduzir(item.attributes);
+              return resTACO[i].attributes = traduzir(item);
             }) 
             this.setState({buscouRecomendados: true})
             return resTACO;
@@ -155,7 +155,6 @@ class App extends Component {
   }
 
   render(){
- 
     return (
       <div className="App">
          <div className="Scanner">

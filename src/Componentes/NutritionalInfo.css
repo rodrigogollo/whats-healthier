@@ -22,3 +22,7 @@ table {
 tr:nth-child(3) > th {
     background-color: #04AA6D;
 }
+
+span {
+    font-weight: bold;
+}

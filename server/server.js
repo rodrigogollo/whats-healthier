@@ -4,7 +4,7 @@ var cors = require('cors')
 const axios = require('axios')
 const stringSimilarity = require('string-similarity');
 
-const foodList = require('../src/TACO/foodList.json')
+const foodList = require('../src/TACO/foodList.json');
 const categoryList = require('../src/TACO/categoryList.json')
 
 app.use(cors());

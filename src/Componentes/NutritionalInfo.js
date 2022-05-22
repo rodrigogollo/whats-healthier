@@ -24,19 +24,27 @@ const NutritionalInfo = ({nutritionalInfo}) => {
                             <td>
                                 {
                                     Object.entries(key[1]).map((key, value) => {
-                                        let res
+                                        let val;
                                         let unit = '';
-                                        if (typeof key[1] !== 'string'){
-                                            res = Math.round(key[1] * 100) / 100;
-                                        } else if (key[1] == 'percents') {
-                                            res = '%';
+                                        if (typeof key[1] === 'number'){
+                                            val = Math.round(key[1] * 100) / 100;
+                                        } else if (key[1] === 'percents') {
+                                            val = '%';
                                         } else {
-                                            res = key[1]
-                                        }
+                                            val = key[1]
+                                        } 
                                         if (key[0] !== 'unit' && key[0] !== 'qty'){
-                                            unit = key[0] + ': ';
+                                            if(typeof key[1] === 'object') {
+                                                return <p key={value}><span>{key[0]+': '}</span>{
+                                                    Object.entries(key[1]).map((chave, index) => {
+                                                    return chave[1]+ ' '
+                                                })}</p>
+                                            } else {
+                                                return <p key={value}><span>{key[0]+': '}</span>{val}</p>
+                                            }
+                                            //unit = key[0] + ': ';
                                         }
-                                        return unit + res + ' ';
+                                        return unit + val + ' ';
                                     })
                                 }
                             </td>
