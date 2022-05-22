@@ -170,8 +170,6 @@ class App extends Component {
   render(){
     return (
       <div className="App">
-        <h1>What's Healthier?</h1>
-
         <div className="comorbidades">
           <h3>Selecione sua Comorbidade:</h3>
           <Checkbox
@@ -185,10 +183,7 @@ class App extends Component {
             onChange={this.handleChangeTwo}
           />
         </div>
-
-       
-
-
+      
         <div className="codigoBarras">
           <div className="Digitar">
             <label htmlFor="gtin">Digite o Número do Código de Barras: 
