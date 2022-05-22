@@ -38,7 +38,10 @@ const NutritionalInfo = ({nutritionalInfo}) => {
                                             if(typeof key[1] === 'object') {
                                                 return <p key={value}><span>{key[0]+': '}</span>{
                                                     Object.entries(key[1]).map((chave, index) => {
-                                                    return chave[1]+ ' '
+                                                        if (typeof chave[1] === 'number'){
+                                                            return Math.round(chave[1] * 100) / 100 + ' '
+                                                        }
+                                                        return chave[1]+ ' '
                                                 })}</p>
                                             } else {
                                                 return <p key={value}><span>{key[0]+': '}</span>{val}</p>

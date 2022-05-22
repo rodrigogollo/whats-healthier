@@ -16,36 +16,47 @@ const config = {
 }
 
 app.get('/api/:gtin', async (req, res) => {
-    const response = await axios.get(`https://api.cosmos.bluesoft.com.br/gtins/${req.params.gtin}`, config);
-    const data = response.data;
-    res.send(data);
+    try {
+        const response = await axios.get(`https://api.cosmos.bluesoft.com.br/gtins/${req.params.gtin}`, config);
+        console.log(response);
+        if(response.status !== 200){
+            res.send('data vazia')
+        } else {
+            res.send(response.data);
+        }
+    } catch(e) {
+        res.send('erro', e)
+    }
 });
 
 app.get('/api/info/:desc', async (req, res) => {
+    try {
+        let produto = format(req.params.desc)
+        let foodListDescArray = foodList.map(it => format(it.description));
+        console.log(req.params.desc)
     
-    let produto = format(req.params.desc)
-    let foodListDescArray = foodList.map(it => format(it.description));
-    console.log(req.params.desc)
-
-    let arrayPalavras = produto.split(" ");
-    let resultados = [];
-    for(const palavra of arrayPalavras){
-        //console.log('palavra', palavra)
-        let retorno = foodListDescArray.filter(item => {
-            if(item.indexOf(palavra) !== -1) return true
-        })
-        //console.log('retorno', retorno)
-        resultados.push(retorno);
-    }
-
-    let resultadosUnicos = [...new Set(resultados.flat(1))]
-    //console.log('res', resultadosUnicos);
-
-    var stringMatch = await stringSimilarity.findBestMatch(produto, resultadosUnicos);
-    let info = [];
-    console.log(stringMatch.bestMatch)
-    if(stringMatch.bestMatch.rating >= 0.41) {
-        info = foodList.filter(item => format(item.description) == format(stringMatch.bestMatch.target))
+        let arrayPalavras = produto.split(" ");
+        let resultados = [];
+        for(const palavra of arrayPalavras){
+            //console.log('palavra', palavra)
+            let retorno = foodListDescArray.filter(item => {
+                if(item.indexOf(palavra) !== -1) return true
+            })
+            //console.log('retorno', retorno)
+            resultados.push(retorno);
+        }
+    
+        let resultadosUnicos = [...new Set(resultados.flat(1))]
+        //console.log('res', resultadosUnicos);
+    
+        var stringMatch = await stringSimilarity.findBestMatch(produto, resultadosUnicos);
+        var info = [];
+        console.log(stringMatch.bestMatch)
+        if(stringMatch.bestMatch.rating >= 0.41) {
+            info = foodList.filter(item => format(item.description) == format(stringMatch.bestMatch.target))
+        }
+    } catch(e) {
+        res.send('erro', e);
     }
     res.send(info[0]);
 })
@@ -113,7 +124,7 @@ app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
     
         res.send(TOP3Recomendados)
     } catch (e) {
-        throw new Error(e)
+        res.send("recomendações não encontradas");
     }
 });
 

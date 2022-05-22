@@ -33,19 +33,6 @@ class App extends Component {
     this.handleEscanearClick = this.handleEscanearClick.bind(this);
   }
 
-  //REFRIGERANTE GUARANÁ = 7891991000826
-  //PAÇOCA - 7896181711971 - deu ruim
-  //PRINGLES - 7896004006482 - deu ruim
-  //REPOLHO - 7898108111369
-  //MELADO - 7898916045016
-  //LEITE CONDENSADO - 7896590817035
-  //BISCOITO TRAQUINAS - 7622210592750
-  //MANGA ESPADA - 7898205079357
-
-  //Miojo - 
-  //Manteiga - 3228020355741
-  //Creme de leite - 7896034630442
-
   handleNumberChange(e){
     this.setState({gtin:e.target.value})
   }
@@ -109,6 +96,7 @@ class App extends Component {
       })
       .then(response => {
         fetch(`http://localhost:5000/api/info/${response.description}`)
+        .catch(e => console.log(e))
         .then(data => data.json())
         .then(resTACO => {
           let atributosTraduzidos = traduzir(resTACO);
@@ -135,8 +123,11 @@ class App extends Component {
           .then(data => this.setState({recomendados: data}))
           .catch(err => console.log(err))
         })
-        .catch(err => console.log('Erro fetch TACO - PRODUTO NÃO ENCONTRADO', err))
-      })
+        .catch(err => {
+          this.setState({ buscouGTIN: true})
+          console.log('Erro fetch TACO - PRODUTO NÃO ENCONTRADO', err)
+        })
+        })
     } catch (err) {
       console.log(err)
     }
