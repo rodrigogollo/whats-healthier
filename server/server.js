@@ -18,14 +18,13 @@ const config = {
 app.get('/api/:gtin', async (req, res) => {
     try {
         const response = await axios.get(`https://api.cosmos.bluesoft.com.br/gtins/${req.params.gtin}`, config);
-        console.log(response);
         if(response.status !== 200){
-            res.send('data vazia')
+            res.status(200).send('data vazia')
         } else {
-            res.send(response.data);
+            res.status(200).send(response.data);
         }
     } catch(e) {
-        res.send('erro', e)
+        res.status(400).send(new Error(e))
     }
 });
 
@@ -56,9 +55,9 @@ app.get('/api/info/:desc', async (req, res) => {
             info = foodList.filter(item => format(item.description) == format(stringMatch.bestMatch.target))
         }
     } catch(e) {
-        res.send('erro', e);
+        res.status(400).send('erro', e);
     }
-    res.send(info[0]);
+    res.status(200).send(info[0]);
 })
 
 app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
@@ -106,10 +105,9 @@ app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
     
                 recomendadosSemTR = result.filter(item => item?.attributes?.sodium?.qty !== "Tr" && item?.attributes?.carbohydrate?.qty !== "Tr")
             } else {
-                res.send('PRODUTO NÃO ENCONTRADO')
+                res.status(400).send('PRODUTO NÃO ENCONTRADO')
             }
         } else {
-            console.log('entrou else')
             foodListHasProperty = foodList.filter(item => item.attributes.hasOwnProperty(atributo))
         
             produtosTACOCategoria = foodListHasProperty.filter(item => item.category_id == categoriaTACO.id && 
@@ -121,10 +119,9 @@ app.get('/api/recomendar/:desc/:comorbidade', async (req, res) => {
         }
 
         const TOP3Recomendados = recomendadosSemTR.slice(0, 3)
-    
-        res.send(TOP3Recomendados)
+        res.status(200).send(TOP3Recomendados)
     } catch (e) {
-        res.send("recomendações não encontradas");
+        res.status(400).send("recomendações não encontradas");
     }
 });
 
